@@ -1,14 +1,18 @@
 {
-  "name": "calorie-tracker-tmp",
+  "name": "calorie-tracker",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:supabase": "node scripts/check-supabase.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.114.0",
+    "lucide-react": "^1.40.0",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
