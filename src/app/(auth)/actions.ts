@@ -2,10 +2,28 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
 
 export interface AuthResult {
   error?: string;
   message?: string;
+}
+
+// Server Action redirects apply their RSC payload client-side without a
+// fresh top-level request, so proxy.ts's onboarding check never re-runs for
+// the destination — this must be decided here, before redirecting.
+async function getPostAuthDestination(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<"/dashboard" | "/onboarding"> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", userId)
+    .single();
+
+  return profile?.onboarding_completed ? "/dashboard" : "/onboarding";
 }
 
 export async function signUp(_prevState: AuthResult, formData: FormData): Promise<AuthResult> {
@@ -39,7 +57,7 @@ export async function signUp(_prevState: AuthResult, formData: FormData): Promis
     return { message: "Check your email to confirm your account before signing in." };
   }
 
-  redirect("/");
+  redirect(await getPostAuthDestination(supabase, data.user!.id));
 }
 
 export async function signIn(_prevState: AuthResult, formData: FormData): Promise<AuthResult> {
@@ -52,13 +70,13 @@ export async function signIn(_prevState: AuthResult, formData: FormData): Promis
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: "Incorrect email or password." };
   }
 
-  redirect("/");
+  redirect(await getPostAuthDestination(supabase, data.user.id));
 }
 
 export async function signOut() {

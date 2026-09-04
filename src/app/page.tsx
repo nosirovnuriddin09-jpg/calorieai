@@ -1,21 +1,29 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import DashboardClient from "@/components/DashboardClient";
+import MarketingHeader from "@/components/marketing/MarketingHeader";
+import Hero from "@/components/marketing/Hero";
+import DayAtAGlance from "@/components/marketing/DayAtAGlance";
+import FoodAnalysisStory from "@/components/marketing/FoodAnalysisStory";
+import CalorieShowcase from "@/components/marketing/CalorieShowcase";
+import MoreThanCalories from "@/components/marketing/MoreThanCalories";
+import AnalyticsShowcase from "@/components/marketing/AnalyticsShowcase";
+import HowItWorks from "@/components/marketing/HowItWorks";
+import FinalCta from "@/components/marketing/FinalCta";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const userName =
-    (user.user_metadata?.full_name as string | undefined)?.split(" ")[0] ||
-    user.email?.split("@")[0] ||
-    "there";
-
-  return <DashboardClient userName={userName} />;
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen w-full">
+      <MarketingHeader />
+      <main>
+        <Hero />
+        <DayAtAGlance />
+        <FoodAnalysisStory />
+        <CalorieShowcase />
+        <MoreThanCalories />
+        <AnalyticsShowcase />
+        <HowItWorks />
+        <FinalCta />
+      </main>
+      <MarketingFooter />
+    </div>
+  );
 }

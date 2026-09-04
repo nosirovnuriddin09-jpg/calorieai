@@ -1,6 +1,6 @@
 "use client";
 
-import { TimeRange } from "@/lib/types";
+import { TimeRange } from "@/types/models";
 
 interface TimeRangeTabsProps {
   value: TimeRange;
@@ -23,7 +23,7 @@ export default function TimeRangeTabs({ value, onChange }: TimeRangeTabsProps) {
             key={opt.id}
             onClick={() => onChange(opt.id)}
             className={`px-4 sm:px-5 h-9 rounded-full text-sm font-medium transition-colors ${
-              isActive ? "bg-foreground text-background" : "text-muted hover:text-foreground"
+              isActive ? "bg-cta text-background" : "text-muted hover:text-foreground"
             }`}
           >
             {opt.label}

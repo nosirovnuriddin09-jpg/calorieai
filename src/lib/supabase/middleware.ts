@@ -28,5 +28,15 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { supabaseResponse, user };
+  let onboardingCompleted: boolean | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .single();
+    onboardingCompleted = profile?.onboarding_completed ?? null;
+  }
+
+  return { supabaseResponse, user, onboardingCompleted };
 }

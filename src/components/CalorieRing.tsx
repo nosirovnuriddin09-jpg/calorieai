@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 interface CalorieRingProps {
   progress: number; // 0-1
   size?: number;
@@ -8,9 +10,57 @@ interface CalorieRingProps {
 const SEGMENTS = 36;
 const ARC_DEGREES = 270;
 const START_ANGLE = 135;
+const ANIMATION_MS = 700;
+
+// Fixed precision keeps the server- and client-rendered path strings
+// byte-identical — full float precision can differ in the last digit
+// between JS engines and trips a React hydration mismatch.
+function round(n: number) {
+  return Math.round(n * 1000) / 1000;
+}
+
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+/** Tweens from the previous progress value to the new one instead of snapping. */
+function useAnimatedProgress(target: number): number {
+  const [displayed, setDisplayed] = useState(target);
+  const fromRef = useRef(target);
+  const frameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    if (from === target) return;
+
+    const start = performance.now();
+    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / ANIMATION_MS, 1);
+      const eased = easeOutCubic(t);
+      setDisplayed(from + (target - from) * eased);
+
+      if (t < 1) {
+        frameRef.current = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = target;
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [target]);
+
+  return displayed;
+}
 
 export default function CalorieRing({ progress, size = 220 }: CalorieRingProps) {
-  const activeSegments = Math.round(SEGMENTS * Math.min(Math.max(progress, 0), 1));
+  const animatedProgress = useAnimatedProgress(progress);
+  const activeSegments = Math.round(SEGMENTS * Math.min(Math.max(animatedProgress, 0), 1));
   const radius = size / 2;
   const segAngle = ARC_DEGREES / SEGMENTS;
   const gap = 2.2;
@@ -25,14 +75,14 @@ export default function CalorieRing({ progress, size = 220 }: CalorieRingProps) 
         const a1 = ((angle + gap / 2) * Math.PI) / 180;
         const a2 = ((angle + segAngle - gap / 2) * Math.PI) / 180;
 
-        const x1 = radius + r1 * Math.cos(a1);
-        const y1 = radius + r1 * Math.sin(a1);
-        const x2 = radius + r2 * Math.cos(a1);
-        const y2 = radius + r2 * Math.sin(a1);
-        const x3 = radius + r2 * Math.cos(a2);
-        const y3 = radius + r2 * Math.sin(a2);
-        const x4 = radius + r1 * Math.cos(a2);
-        const y4 = radius + r1 * Math.sin(a2);
+        const x1 = round(radius + r1 * Math.cos(a1));
+        const y1 = round(radius + r1 * Math.sin(a1));
+        const x2 = round(radius + r2 * Math.cos(a1));
+        const y2 = round(radius + r2 * Math.sin(a1));
+        const x3 = round(radius + r2 * Math.cos(a2));
+        const y3 = round(radius + r2 * Math.sin(a2));
+        const x4 = round(radius + r1 * Math.cos(a2));
+        const y4 = round(radius + r1 * Math.sin(a2));
 
         const path = `M ${x1} ${y1} L ${x2} ${y2} A ${r2} ${r2} 0 0 1 ${x3} ${y3} L ${x4} ${y4} A ${r1} ${r1} 0 0 0 ${x1} ${y1} Z`;
 
@@ -44,7 +94,7 @@ export default function CalorieRing({ progress, size = 220 }: CalorieRingProps) 
           else fill = "#8b6ee8";
         }
 
-        return <path key={i} d={path} fill={fill} />;
+        return <path key={i} d={path} fill={fill} style={{ transition: "fill 0.15s ease-out" }} />;
       })}
     </svg>
   );

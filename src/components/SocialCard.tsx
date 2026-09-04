@@ -19,7 +19,7 @@ export default function SocialCard() {
       <p className="text-sm text-muted-2 mb-4 leading-snug">
         Invite your crew to join MuseFit and keep each other accountable.
       </p>
-      <button className="h-10 px-5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity">
+      <button className="h-10 px-5 rounded-full bg-cta text-background text-sm font-medium hover:opacity-90 transition-opacity">
         Invite friends
       </button>
     </div>

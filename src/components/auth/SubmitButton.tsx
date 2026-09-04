@@ -14,7 +14,7 @@ export default function SubmitButton({ children }: SubmitButtonProps) {
     <button
       type="submit"
       disabled={pending}
-      className="h-11 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+      className="h-11 px-6 rounded-full bg-cta text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2 w-full"
     >
       {pending && <Loader2 size={16} className="animate-spin" />}
       {children}

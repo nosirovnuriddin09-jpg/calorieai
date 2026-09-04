@@ -15,7 +15,7 @@ export default function PromoCard({ title, description, ctaLabel, onCta }: Promo
       <p className="text-sm text-lime-dark/80 mb-4 leading-snug max-w-[85%] relative">{description}</p>
       <button
         onClick={onCta}
-        className="h-10 px-5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity relative"
+        className="h-10 px-5 rounded-full bg-cta text-background text-sm font-medium hover:opacity-90 transition-opacity relative"
       >
         {ctaLabel}
       </button>

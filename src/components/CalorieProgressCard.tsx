@@ -1,34 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Flame, Wheat, Beef, Droplet, Plus } from "lucide-react";
+import { Flame, Wheat, Beef, Droplet, Plus, Loader2 } from "lucide-react";
 import CalorieRing from "./CalorieRing";
-import { CalorieState } from "@/lib/types";
 
 interface CalorieProgressCardProps {
-  calories: CalorieState;
-  onAddCalories: (amount: number) => void;
+  calories: {
+    goal: number;
+    food: number;
+    exercise: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
+  onAddCalories: (amount: number) => void | Promise<void>;
+  readOnly?: boolean;
 }
 
-export default function CalorieProgressCard({ calories, onAddCalories }: CalorieProgressCardProps) {
+export default function CalorieProgressCard({ calories, onAddCalories, readOnly }: CalorieProgressCardProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const remaining = Math.max(calories.goal - calories.food + calories.exercise, 0);
-  const progress = Math.min(calories.food / calories.goal, 1);
+  const progress = calories.goal > 0 ? Math.min(calories.food / calories.goal, 1) : 0;
 
   const macros = [
-    { label: "Protein", value: "40/70g", icon: Beef, color: "text-yellow-accent" },
-    { label: "Carbs", value: "40/175g", icon: Wheat, color: "text-green-accent" },
-    { label: "Fat", value: "40/70g", icon: Droplet, color: "text-blue-accent" },
+    { label: "Protein", value: `${Math.round(calories.protein ?? 0)}g`, icon: Beef, color: "text-yellow-accent" },
+    { label: "Carbs", value: `${Math.round(calories.carbs ?? 0)}g`, icon: Wheat, color: "text-green-accent" },
+    { label: "Fat", value: `${Math.round(calories.fat ?? 0)}g`, icon: Droplet, color: "text-blue-accent" },
   ];
 
-  const submit = () => {
+  const submit = async () => {
     const n = parseInt(amount, 10);
     if (!Number.isNaN(n) && n > 0) {
-      onAddCalories(n);
-      setAmount("");
-      setShowAdd(false);
+      setSubmitting(true);
+      try {
+        await onAddCalories(n);
+        setAmount("");
+        setShowAdd(false);
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -36,12 +49,14 @@ export default function CalorieProgressCard({ calories, onAddCalories }: Calorie
     <div className="bg-surface rounded-[28px] p-6 sm:p-7 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-black/[0.03]">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-base font-semibold">Calories</h2>
-        <button
-          onClick={() => setShowAdd((s) => !s)}
-          className="flex items-center gap-1 text-xs font-medium text-muted hover:text-foreground transition-colors"
-        >
-          <Plus size={14} /> Edit
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowAdd((s) => !s)}
+            className="flex items-center gap-1 text-xs font-medium text-muted hover:text-foreground transition-colors"
+          >
+            <Plus size={14} /> Add
+          </button>
+        )}
       </div>
 
       {showAdd && (
@@ -57,8 +72,10 @@ export default function CalorieProgressCard({ calories, onAddCalories }: Calorie
           />
           <button
             onClick={submit}
-            className="h-10 px-4 rounded-full bg-foreground text-background text-sm font-medium"
+            disabled={submitting}
+            className="h-10 px-4 rounded-full bg-cta text-background text-sm font-medium disabled:opacity-60 flex items-center gap-1.5"
           >
+            {submitting && <Loader2 size={14} className="animate-spin" />}
             Add
           </button>
         </div>
