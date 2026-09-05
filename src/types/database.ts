@@ -1,216 +1,268 @@
-// Mirrors supabase/migrations/0001_init_schema.sql.
-// If the schema changes, regenerate with:
-//   npx supabase gen types typescript --project-id <ref> > src/types/database.ts
-export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
-export type ActivityLevel = "sedentary" | "lightly_active" | "moderately_active" | "very_active";
-export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
-export type GoalType = "lose_weight" | "maintain_weight" | "gain_weight";
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      profiles: {
+      daily_stats: {
         Row: {
-          id: string;
-          full_name: string | null;
-          avatar_url: string | null;
-          age: number | null;
-          gender: Gender | null;
-          height_cm: number | null;
-          weight_kg: number | null;
-          activity_level: ActivityLevel | null;
-          daily_calorie_goal: number | null;
-          onboarding_completed: boolean;
-          default_water_goal_ml: number | null;
-          default_steps_goal: number | null;
-          default_sleep_goal_minutes: number | null;
-          goal_type: GoalType | null;
-          created_at: string;
-          updated_at: string;
-        };
+          id: string
+          log_date: string
+          sleep_minutes: number | null
+          steps: number | null
+          steps_goal: number | null
+          user_id: string
+          water_goal_ml: number | null
+          water_ml: number | null
+        }
         Insert: {
-          id: string;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          age?: number | null;
-          gender?: Gender | null;
-          height_cm?: number | null;
-          weight_kg?: number | null;
-          activity_level?: ActivityLevel | null;
-          daily_calorie_goal?: number | null;
-          onboarding_completed?: boolean;
-          default_water_goal_ml?: number | null;
-          default_steps_goal?: number | null;
-          default_sleep_goal_minutes?: number | null;
-          goal_type?: GoalType | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
-        Relationships: [];
-      };
+          id?: string
+          log_date?: string
+          sleep_minutes?: number | null
+          steps?: number | null
+          steps_goal?: number | null
+          user_id: string
+          water_goal_ml?: number | null
+          water_ml?: number | null
+        }
+        Update: {
+          id?: string
+          log_date?: string
+          sleep_minutes?: number | null
+          steps?: number | null
+          steps_goal?: number | null
+          user_id?: string
+          water_goal_ml?: number | null
+          water_ml?: number | null
+        }
+        Relationships: []
+      }
       meals: {
         Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          meal_type: MealType;
-          calories: number;
-          protein: number | null;
-          carbs: number | null;
-          fat: number | null;
-          fiber: number | null;
-          image_url: string | null;
-          consumed_at: string;
-          created_at: string;
-        };
+          calories: number
+          carbs_g: number | null
+          created_at: string | null
+          eaten_at: string | null
+          emoji: string | null
+          fat_g: number | null
+          id: string
+          name: string
+          portion_g: number | null
+          protein_g: number | null
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          meal_type: MealType;
-          calories: number;
-          protein?: number | null;
-          carbs?: number | null;
-          fat?: number | null;
-          fiber?: number | null;
-          image_url?: string | null;
-          consumed_at?: string;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["meals"]["Insert"]>;
-        Relationships: [];
-      };
-      water_logs: {
+          calories: number
+          carbs_g?: number | null
+          created_at?: string | null
+          eaten_at?: string | null
+          emoji?: string | null
+          fat_g?: number | null
+          id?: string
+          name: string
+          portion_g?: number | null
+          protein_g?: number | null
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs_g?: number | null
+          created_at?: string | null
+          eaten_at?: string | null
+          emoji?: string | null
+          fat_g?: number | null
+          id?: string
+          name?: string
+          portion_g?: number | null
+          protein_g?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
         Row: {
-          id: string;
-          user_id: string;
-          amount_ml: number;
-          logged_at: string;
-          created_at: string;
-        };
+          activity_level: number | null
+          age: number | null
+          created_at: string | null
+          full_name: string | null
+          gender: string | null
+          height_cm: number | null
+          id: string
+          tdee_goal: number | null
+          updated_at: string | null
+          weight_kg: number | null
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          amount_ml: number;
-          logged_at?: string;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["water_logs"]["Insert"]>;
-        Relationships: [];
-      };
-      exercise_logs: {
-        Row: {
-          id: string;
-          user_id: string;
-          exercise_name: string;
-          duration_minutes: number;
-          calories_burned: number;
-          notes: string | null;
-          performed_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          exercise_name: string;
-          duration_minutes: number;
-          calories_burned?: number;
-          notes?: string | null;
-          performed_at?: string;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["exercise_logs"]["Insert"]>;
-        Relationships: [];
-      };
-      sleep_logs: {
-        Row: {
-          id: string;
-          user_id: string;
-          sleep_duration_minutes: number;
-          sleep_start: string;
-          sleep_end: string;
-          sleep_quality: number | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          sleep_duration_minutes: number;
-          sleep_start: string;
-          sleep_end: string;
-          sleep_quality?: number | null;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["sleep_logs"]["Insert"]>;
-        Relationships: [];
-      };
-      step_logs: {
-        Row: {
-          id: string;
-          user_id: string;
-          steps: number;
-          logged_date: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          steps?: number;
-          logged_date?: string;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["step_logs"]["Insert"]>;
-        Relationships: [];
-      };
-      daily_goals: {
-        Row: {
-          id: string;
-          user_id: string;
-          date: string;
-          calorie_goal: number | null;
-          water_goal_ml: number | null;
-          steps_goal: number | null;
-          sleep_goal_minutes: number | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          date?: string;
-          calorie_goal?: number | null;
-          water_goal_ml?: number | null;
-          steps_goal?: number | null;
-          sleep_goal_minutes?: number | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["daily_goals"]["Insert"]>;
-        Relationships: [];
-      };
-      weight_logs: {
-        Row: {
-          id: string;
-          user_id: string;
-          weight_kg: number;
-          logged_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          weight_kg: number;
-          logged_at?: string;
-          created_at?: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["weight_logs"]["Insert"]>;
-        Relationships: [];
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
-    CompositeTypes: Record<string, never>;
-  };
+          activity_level?: number | null
+          age?: number | null
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id: string
+          tdee_goal?: number | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          activity_level?: number | null
+          age?: number | null
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id?: string
+          tdee_goal?: number | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
