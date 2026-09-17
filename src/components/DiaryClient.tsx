@@ -7,10 +7,10 @@ import DiaryDateNav from "@/components/diary/DiaryDateNav";
 import DiaryMealGroup from "@/components/diary/DiaryMealGroup";
 import AddMealModal, { type AddMealInput } from "@/components/meals/AddMealModal";
 import Toast from "@/components/Toast";
-import { useDiaryDay } from "@/hooks/useDiaryDay";
+import { useDiaryDay } from "@/hooks/queries/diary";
+import { useAddMeal, useUpdateMeal, useDeleteMeal } from "@/hooks/mutations/meals";
 import { getLocalDateString } from "@/lib/dateRange";
 import { MEAL_TYPE_ORDER } from "@/lib/diaryData";
-import { addMealAction, updateMealAction, deleteMealAction } from "@/app/actions/dashboard";
 import type { Meal } from "@/types/models";
 
 interface DiaryClientProps {
@@ -19,13 +19,16 @@ interface DiaryClientProps {
 
 export default function DiaryClient({ userId }: DiaryClientProps) {
   const [date, setDate] = useState(getLocalDateString());
-  const [refreshKey, setRefreshKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const { data, loading, error } = useDiaryDay(userId, date, refreshKey);
+  const { data, isLoading, isError, error: queryError } = useDiaryDay(userId, date);
+  const loading = isLoading;
+  const error = isError ? (queryError instanceof Error ? queryError.message : "Failed to load diary.") : null;
 
-  const bump = () => setRefreshKey((k) => k + 1);
+  const addMeal = useAddMeal(userId);
+  const updateMeal = useUpdateMeal(userId);
+  const deleteMeal = useDeleteMeal(userId);
 
   const openAddModal = () => {
     setEditingMeal(null);
@@ -38,15 +41,15 @@ export default function DiaryClient({ userId }: DiaryClientProps) {
   };
 
   const handleSubmit = async (input: AddMealInput) => {
-    const result = editingMeal ? await updateMealAction(editingMeal.id, input) : await addMealAction(input);
+    const result = editingMeal
+      ? await updateMeal.mutateAsync({ mealId: editingMeal.id, input })
+      : await addMeal.mutateAsync(input);
     if (result?.error) return result;
-    bump();
     setToastMessage(editingMeal ? "Meal updated" : "Meal added");
   };
 
   const handleDelete = async (mealId: string) => {
-    await deleteMealAction(mealId);
-    bump();
+    await deleteMeal.mutateAsync(mealId);
     setToastMessage("Meal removed");
   };
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, Scale } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import WeeklyBarChart from "@/components/analytics/WeeklyBarChart";
@@ -10,23 +9,25 @@ import ExerciseHistoryList from "@/components/analytics/ExerciseHistoryList";
 import NutritionAverages from "@/components/analytics/NutritionAverages";
 import LogWeightModal from "@/components/analytics/LogWeightModal";
 import Toast from "@/components/Toast";
-import { addWeightLogAction } from "@/app/actions/analytics";
+import { useAnalyticsData } from "@/hooks/queries/analytics";
+import { useAddWeight } from "@/hooks/mutations/weight";
 import type { AnalyticsData } from "@/lib/analyticsData";
 
 interface AnalyticsClientProps {
-  data: AnalyticsData;
+  userId: string;
+  initialData: AnalyticsData;
 }
 
-export default function AnalyticsClient({ data }: AnalyticsClientProps) {
-  const router = useRouter();
+export default function AnalyticsClient({ userId, initialData }: AnalyticsClientProps) {
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { data } = useAnalyticsData(userId, initialData);
+  const addWeight = useAddWeight(userId);
 
   const handleAddWeight = async (weightKg: number) => {
-    const result = await addWeightLogAction(weightKg);
+    const result = await addWeight.mutateAsync(weightKg);
     if (result?.error) return result;
     setToastMessage("Weight logged");
-    router.refresh();
   };
 
   const latestWeight = data.weightHistory[data.weightHistory.length - 1];

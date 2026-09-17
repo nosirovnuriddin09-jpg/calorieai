@@ -1,24 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { UtensilsCrossed, Camera, Droplets, Dumbbell, Moon, Footprints } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import Toast from "@/components/Toast";
-import AddMealModal, { type AddMealInput } from "@/components/meals/AddMealModal";
-import AnalyzeFoodModal, { type AnalyzedMealInput } from "@/components/meals/AnalyzeFoodModal";
-import AddWaterModal from "@/components/water/AddWaterModal";
-import AddExerciseModal, { type AddExerciseInput } from "@/components/exercise/AddExerciseModal";
-import AddSleepModal, { type AddSleepInput } from "@/components/sleep/AddSleepModal";
-import EditStepsModal from "@/components/steps/EditStepsModal";
-import {
-  addMealAction,
-  addWaterAction,
-  addExerciseAction,
-  addSleepAction,
-  upsertStepsAction,
-} from "@/app/actions/dashboard";
+import type { AddMealInput } from "@/components/meals/AddMealModal";
+import type { AnalyzedMealInput } from "@/components/meals/AnalyzeFoodModal";
+import type { AddExerciseInput } from "@/components/exercise/AddExerciseModal";
+import type { AddSleepInput } from "@/components/sleep/AddSleepModal";
+import { useAddMeal } from "@/hooks/mutations/meals";
+import { useAddWater } from "@/hooks/mutations/water";
+import { useAddExercise } from "@/hooks/mutations/exercise";
+import { useAddSleep } from "@/hooks/mutations/sleep";
+import { useUpdateSteps } from "@/hooks/mutations/steps";
+import { useStepsForDate } from "@/hooks/queries/steps";
 import { getLocalDateString } from "@/lib/dateRange";
+
+// Each modal is loaded only once the user actually opens it, instead of
+// being bundled into /add's initial JS chunk. AnalyzeFoodModal is the
+// heaviest of the six (Gemini photo-analysis flow, image upload) and the
+// one this matters most for.
+const AddMealModal = dynamic(() => import("@/components/meals/AddMealModal"));
+const AnalyzeFoodModal = dynamic(() => import("@/components/meals/AnalyzeFoodModal"));
+const AddWaterModal = dynamic(() => import("@/components/water/AddWaterModal"));
+const AddExerciseModal = dynamic(() => import("@/components/exercise/AddExerciseModal"));
+const AddSleepModal = dynamic(() => import("@/components/sleep/AddSleepModal"));
+const EditStepsModal = dynamic(() => import("@/components/steps/EditStepsModal"));
 
 interface AddClientProps {
   userId: string;
@@ -28,49 +36,54 @@ interface AddClientProps {
 
 type ModalKind = "meal" | "photo" | "water" | "exercise" | "sleep" | "steps" | null;
 
-export default function AddClient({ userId, currentSteps, stepsGoal }: AddClientProps) {
-  const router = useRouter();
+export default function AddClient({ userId, currentSteps: initialSteps, stepsGoal }: AddClientProps) {
   const [openModal, setOpenModal] = useState<ModalKind>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const { data: currentSteps = initialSteps } = useStepsForDate(userId, getLocalDateString(), initialSteps);
+  const addMeal = useAddMeal(userId);
+  const addWater = useAddWater(userId);
+  const addExercise = useAddExercise(userId);
+  const addSleep = useAddSleep(userId);
+  const updateSteps = useUpdateSteps(userId);
 
   const finish = (message: string) => {
     setOpenModal(null);
     setToastMessage(message);
-    router.refresh();
   };
 
   const handleAddMeal = async (meal: AddMealInput) => {
-    const result = await addMealAction(meal);
+    const result = await addMeal.mutateAsync(meal);
     if (result?.error) return result;
     finish("Meal added");
   };
 
   const handleAddAnalyzedMeal = async (meal: AnalyzedMealInput) => {
-    const result = await addMealAction(meal);
+    const result = await addMeal.mutateAsync(meal);
     if (result?.error) return result;
     finish("Meal added");
   };
 
   const handleAddWater = async (amountMl: number) => {
-    const result = await addWaterAction(amountMl);
+    const result = await addWater.mutateAsync(amountMl);
     if (result?.error) return result;
     finish("Water logged");
   };
 
   const handleAddExercise = async (input: AddExerciseInput) => {
-    const result = await addExerciseAction(input);
+    const result = await addExercise.mutateAsync(input);
     if (result?.error) return result;
     finish("Exercise logged");
   };
 
   const handleAddSleep = async (input: AddSleepInput) => {
-    const result = await addSleepAction(input);
+    const result = await addSleep.mutateAsync(input);
     if (result?.error) return result;
     finish("Sleep logged");
   };
 
   const handleUpdateSteps = async (steps: number) => {
-    const result = await upsertStepsAction(steps, getLocalDateString());
+    const result = await updateSteps.mutateAsync(steps);
     if (result?.error) return result;
     finish("Steps updated");
   };

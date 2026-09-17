@@ -17,16 +17,12 @@ import AddWaterModal from "@/components/water/AddWaterModal";
 import AddExerciseModal, { type AddExerciseInput } from "@/components/exercise/AddExerciseModal";
 import AddSleepModal, { type AddSleepInput } from "@/components/sleep/AddSleepModal";
 import EditStepsModal from "@/components/steps/EditStepsModal";
-import { useDashboardData } from "@/hooks/useDashboardData";
-import { getLocalDateString } from "@/lib/dateRange";
-import {
-  addMealAction,
-  addWaterAction,
-  addExerciseAction,
-  addSleepAction,
-  upsertStepsAction,
-  deleteMealAction,
-} from "@/app/actions/dashboard";
+import { useDashboardData } from "@/hooks/queries/dashboard";
+import { useAddMeal, useDeleteMeal } from "@/hooks/mutations/meals";
+import { useAddWater } from "@/hooks/mutations/water";
+import { useAddExercise } from "@/hooks/mutations/exercise";
+import { useAddSleep } from "@/hooks/mutations/sleep";
+import { useUpdateSteps } from "@/hooks/mutations/steps";
 import type { Profile, TimeRange } from "@/types/models";
 
 interface DashboardClientProps {
@@ -37,7 +33,6 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ userId, userName, initialProfile }: DashboardClientProps) {
   const [range, setRange] = useState<TimeRange>("today");
-  const [refreshKey, setRefreshKey] = useState(0);
   const [mealModalOpen, setMealModalOpen] = useState(false);
   const [analyzeFoodModalOpen, setAnalyzeFoodModalOpen] = useState(false);
   const [waterModalOpen, setWaterModalOpen] = useState(false);
@@ -45,69 +40,62 @@ export default function DashboardClient({ userId, userName, initialProfile }: Da
   const [sleepModalOpen, setSleepModalOpen] = useState(false);
   const [stepsModalOpen, setStepsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const { data, loading, error, refresh } = useDashboardData(userId, initialProfile, range, refreshKey);
+  const { data, loading, error } = useDashboardData(userId, initialProfile, range);
 
-  const bump = () => {
-    setRefreshKey((k) => k + 1);
-    refresh();
-  };
+  const addMeal = useAddMeal(userId);
+  const deleteMeal = useDeleteMeal(userId);
+  const addWater = useAddWater(userId);
+  const addExercise = useAddExercise(userId);
+  const addSleep = useAddSleep(userId);
+  const updateSteps = useUpdateSteps(userId);
 
   const handleAddCalories = async (amount: number) => {
-    await addMealAction({ name: "Quick add", mealType: "snack", calories: amount });
-    bump();
+    await addMeal.mutateAsync({ name: "Quick add", mealType: "snack", calories: amount });
     setToastMessage("Calories added");
   };
 
   const handleAddMeal = async (meal: AddMealInput) => {
-    const result = await addMealAction(meal);
+    const result = await addMeal.mutateAsync(meal);
     if (result?.error) return result;
-    bump();
     setToastMessage("Meal added");
   };
 
   const handleAddAnalyzedMeal = async (meal: AnalyzedMealInput) => {
-    const result = await addMealAction(meal);
+    const result = await addMeal.mutateAsync(meal);
     if (result?.error) return result;
-    bump();
     setToastMessage("Meal added");
   };
 
   const handleDeleteMeal = async (mealId: string) => {
-    await deleteMealAction(mealId);
-    bump();
+    await deleteMeal.mutateAsync(mealId);
     setToastMessage("Meal removed");
   };
 
   const handleAdjustWater = async (deltaMl: number) => {
-    await addWaterAction(deltaMl);
-    bump();
+    await addWater.mutateAsync(deltaMl);
   };
 
   const handleAddWater = async (amountMl: number) => {
-    const result = await addWaterAction(amountMl);
+    const result = await addWater.mutateAsync(amountMl);
     if (result?.error) return result;
-    bump();
     setToastMessage("Water logged");
   };
 
   const handleAddExercise = async (input: AddExerciseInput) => {
-    const result = await addExerciseAction(input);
+    const result = await addExercise.mutateAsync(input);
     if (result?.error) return result;
-    bump();
     setToastMessage("Exercise logged");
   };
 
   const handleAddSleep = async (input: AddSleepInput) => {
-    const result = await addSleepAction(input);
+    const result = await addSleep.mutateAsync(input);
     if (result?.error) return result;
-    bump();
     setToastMessage("Sleep logged");
   };
 
   const handleUpdateSteps = async (steps: number) => {
-    const result = await upsertStepsAction(steps, getLocalDateString());
+    const result = await updateSteps.mutateAsync(steps);
     if (result?.error) return result;
-    bump();
     setToastMessage("Steps updated");
   };
 

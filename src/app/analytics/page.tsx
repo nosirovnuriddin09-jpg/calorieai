@@ -13,5 +13,5 @@ export default async function AnalyticsPage() {
 
   const data = await getAnalyticsData(supabase, user.id);
 
-  return <AnalyticsClient data={data} />;
+  return <AnalyticsClient userId={user.id} initialData={data} />;
 }

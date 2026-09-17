@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Bell, LogOut, Search, Sparkles } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 
@@ -8,6 +9,16 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ userName }: DashboardHeaderProps) {
+  const queryClient = useQueryClient();
+
+  // Clears every cached query (meals, water, goals, etc.) before the
+  // server action's redirect fires, so the next person to sign in on this
+  // device — or this user signing back in as someone else — never sees a
+  // stale query resolve with the previous account's cached data.
+  const handleSignOut = () => {
+    queryClient.clear();
+  };
+
   return (
     <header className="flex items-center gap-3">
       <div className="h-11 w-11 rounded-full bg-gradient-to-br from-purple-accent to-blue-accent flex items-center justify-center text-white font-semibold shrink-0">
@@ -43,7 +54,7 @@ export default function DashboardHeader({ userName }: DashboardHeaderProps) {
         <Sparkles size={18} className="text-purple-accent" />
       </button>
 
-      <form action={signOut}>
+      <form action={signOut} onSubmit={handleSignOut}>
         <button
           type="submit"
           aria-label="Sign out"
