@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Footprints, Moon, Droplets, Activity, Plus, Minus } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
 import DashboardHeader from "@/components/DashboardHeader";
 import TimeRangeTabs from "@/components/TimeRangeTabs";
 import CalorieProgressCard from "@/components/CalorieProgressCard";
@@ -100,20 +99,14 @@ export default function DashboardClient({ userId, userName, initialProfile }: Da
   };
 
   if (loading && !data) {
-    return (
-      <DashboardLayout>
-        <DashboardSkeleton />
-      </DashboardLayout>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error || !data) {
     return (
-      <DashboardLayout>
-        <div className="bg-surface rounded-[28px] p-10 text-center text-sm text-muted shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-black/[0.03]">
-          {error ?? "Something went wrong loading your dashboard."}
-        </div>
-      </DashboardLayout>
+      <div className="bg-surface rounded-[28px] p-10 text-center text-sm text-muted shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-black/[0.03]">
+        {error ?? "Something went wrong loading your dashboard."}
+      </div>
     );
   }
 
@@ -124,7 +117,7 @@ export default function DashboardClient({ userId, userName, initialProfile }: Da
   const sleepMins = data.sleep.totalMinutes % 60;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5">
         {/* Main column */}
         <div className="flex flex-col gap-5 min-w-0">
@@ -288,6 +281,6 @@ export default function DashboardClient({ userId, userName, initialProfile }: Da
         onSubmit={handleUpdateSteps}
       />
       <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
-    </DashboardLayout>
+    </>
   );
 }

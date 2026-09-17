@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
-import { updateProfileDetails, type ProfileFormResult } from "@/app/profile/actions";
+import { updateProfileDetails, type ProfileFormResult } from "@/app/(app)/profile/actions";
 import AuthField from "@/components/auth/AuthField";
 import SubmitButton from "@/components/auth/SubmitButton";
 import OptionCard from "@/components/onboarding/OptionCard";

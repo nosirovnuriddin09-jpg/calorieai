@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
 import DiaryDateNav from "@/components/diary/DiaryDateNav";
 import DiaryMealGroup from "@/components/diary/DiaryMealGroup";
 import AddMealModal, { type AddMealInput } from "@/components/meals/AddMealModal";
@@ -54,7 +53,7 @@ export default function DiaryClient({ userId }: DiaryClientProps) {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col gap-5 max-w-2xl mx-auto">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
@@ -109,6 +108,6 @@ export default function DiaryClient({ userId }: DiaryClientProps) {
         editingMeal={editingMeal}
       />
       <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,12 +1,10 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getVerifiedUser } from "@/lib/supabase/server";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 
 export default async function OnboardingPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getVerifiedUser(supabase);
 
   if (!user) {
     redirect("/login");
@@ -22,8 +20,5 @@ export default async function OnboardingPage() {
     redirect("/dashboard");
   }
 
-  const defaultName =
-    profile?.full_name || (user.user_metadata?.full_name as string | undefined) || "";
-
-  return <OnboardingFlow defaultName={defaultName} />;
+  return <OnboardingFlow defaultName={profile?.full_name || ""} />;
 }

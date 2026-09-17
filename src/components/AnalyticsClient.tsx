@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus, Scale } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
 import WeeklyBarChart from "@/components/analytics/WeeklyBarChart";
 import WeightLineChart from "@/components/analytics/WeightLineChart";
 import ExerciseHistoryList from "@/components/analytics/ExerciseHistoryList";
@@ -33,7 +32,7 @@ export default function AnalyticsClient({ userId, initialData }: AnalyticsClient
   const latestWeight = data.weightHistory[data.weightHistory.length - 1];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col gap-5 max-w-4xl mx-auto">
         <div>
           <h1 className="text-xl font-bold">Analytics</h1>
@@ -90,6 +89,6 @@ export default function AnalyticsClient({ userId, initialData }: AnalyticsClient
         onSubmit={handleAddWeight}
       />
       <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
-    </DashboardLayout>
+    </>
   );
 }

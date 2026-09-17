@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { ONBOARDING_COOKIE } from "@/lib/supabase/middleware";
 import type { ActivityLevel, Gender, GoalType } from "@/types/models";
 
 export interface OnboardingResult {
@@ -58,6 +60,13 @@ export async function completeOnboarding(
   if (error) {
     return { error: error.message };
   }
+
+  const cookieStore = await cookies();
+  cookieStore.set(ONBOARDING_COOKIE, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
 
   redirect("/dashboard");
 }

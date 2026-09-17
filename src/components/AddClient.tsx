@@ -3,7 +3,6 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { UtensilsCrossed, Camera, Droplets, Dumbbell, Moon, Footprints } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
 import Toast from "@/components/Toast";
 import type { AddMealInput } from "@/components/meals/AddMealModal";
 import type { AnalyzedMealInput } from "@/components/meals/AnalyzeFoodModal";
@@ -140,7 +139,7 @@ export default function AddClient({ userId, currentSteps: initialSteps, stepsGoa
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col gap-5 max-w-2xl mx-auto">
         <div>
           <h1 className="text-xl font-bold">Quick add</h1>
@@ -188,6 +187,6 @@ export default function AddClient({ userId, currentSteps: initialSteps, stepsGoa
         onSubmit={handleUpdateSteps}
       />
       <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
-    </DashboardLayout>
+    </>
   );
 }

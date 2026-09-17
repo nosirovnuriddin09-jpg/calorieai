@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getVerifiedUser } from "@/lib/supabase/server";
 import { getStepLogForDate } from "@/services/steps";
 import { getLocalDateString } from "@/lib/dateRange";
 import AddClient from "@/components/AddClient";
@@ -8,9 +8,7 @@ const DEFAULT_STEPS_GOAL = 10000;
 
 export default async function AddPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getVerifiedUser(supabase);
   if (!user) redirect("/login");
 
   const [stepLog, { data: profile }] = await Promise.all([
